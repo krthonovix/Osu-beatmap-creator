@@ -53,6 +53,10 @@ if not exist "Mapperatorinator\.venv\Scripts\python.exe" (
     cd ..
 )
 
+:: 6. Aplicar parches de estabilidad y compatibilidad al motor
+echo [*] Verificando parches de compatibilidad del motor de IA...
+.\.venv\Scripts\python.exe -c "from backend.engine_patcher import ensure_engine_patched; ensure_engine_patched('Mapperatorinator')"
+
 echo.
 echo ========================================================
 echo   Instalacion completada con exito!

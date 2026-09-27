@@ -47,16 +47,23 @@ def build_inference_args(
     difficulty: float,
     style_id: str = "jump",
     mapper_key: str = "sotarks",
+    custom_ar: Optional[float] = None,
     custom_cs: Optional[float] = None,
+    custom_od: Optional[float] = None,
+    custom_hp: Optional[float] = None,
     custom_sv: Optional[float] = None,
+    custom_bpm: Optional[float] = None,
     hitsounded: bool = False
 ) -> List[str]:
     """
     Construye la lista de argumentos en formato Hydra override para inference.py de Mapperatorinator.
     """
     stats = calculate_difficulty_stats(difficulty)
-    cs = custom_cs if custom_cs is not None else stats["cs"]
-    sv = custom_sv if custom_sv is not None else stats["sv"]
+    ar = round(custom_ar, 1) if custom_ar is not None else stats["ar"]
+    cs = round(custom_cs, 1) if custom_cs is not None else stats["cs"]
+    od = round(custom_od, 1) if custom_od is not None else stats["od"]
+    hp = round(custom_hp, 1) if custom_hp is not None else stats["hp"]
+    sv = round(custom_sv, 2) if custom_sv is not None else stats["sv"]
     
     # Buscar mapper
     mapper_info = next((m for m in MAPPER_PROFILES if m["id"] == mapper_key), None)
@@ -79,17 +86,21 @@ def build_inference_args(
         f"output_path='{norm_output}'",
         "gamemode=0", # osu! standard
         f"difficulty={round(difficulty, 2)}",
-        f"approach_rate={stats['ar']}",
-        f"overall_difficulty={stats['od']}",
-        f"hp_drain_rate={stats['hp']}",
+        f"approach_rate={ar}",
         f"circle_size={cs}",
+        f"overall_difficulty={od}",
+        f"hp_drain_rate={hp}",
         f"slider_multiplier={sv}",
         f"descriptors={desc_str}",
         f"hitsounded={str(hitsounded).lower()}",
         "in_context=[NONE]",
         "precision='fp16'",
+        "fast_decoder_loop=True",
         "year=2024"
     ]
+
+    if custom_bpm is not None and custom_bpm > 0:
+        args.append(f"bpm={int(round(custom_bpm))}")
 
     if mapper_id is not None:
         args.append(f"mapper_id={mapper_id}")

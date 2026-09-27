@@ -12,6 +12,7 @@ from backend.audio_analyzer import AudioAnalyzer
 from backend.mapper_profiles import MAPPER_PROFILES, MAP_STYLES
 from backend.models.job import JobState, JobStatus
 from backend.generator import BeatmapGenerator, PROJECT_ROOT
+from backend.history_manager import HistoryManager
 
 app = FastAPI(title="Ai Mapper - osu! Beatmap Creator", version="1.0.0")
 
@@ -93,6 +94,12 @@ async def start_generation(
     mapper_id: str = Form("sotarks"),
     title: Optional[str] = Form(None),
     artist: Optional[str] = Form(None),
+    ar: Optional[float] = Form(None),
+    cs: Optional[float] = Form(None),
+    od: Optional[float] = Form(None),
+    hp: Optional[float] = Form(None),
+    sv: Optional[float] = Form(None),
+    bpm: Optional[float] = Form(None),
 ):
     audio_path = uploaded_audios.get(audio_token)
     if not audio_path or not os.path.exists(audio_path):
@@ -115,7 +122,13 @@ async def start_generation(
         style_id=style_id,
         mapper_id=mapper_id,
         title=title or "Track",
-        artist=artist or "Artist"
+        artist=artist or "Artist",
+        custom_ar=ar,
+        custom_cs=cs,
+        custom_od=od,
+        custom_hp=hp,
+        custom_sv=sv,
+        custom_bpm=bpm
     )
     
     jobs[job_id] = job
@@ -167,18 +180,44 @@ async def stream_job_events(job_id: str):
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
+@app.get("/api/history")
+async def get_history():
+    """
+    Obtiene el historial de beatmaps generados disponibles en disco.
+    """
+    return HistoryManager.get_history()
+
+@app.delete("/api/history/{job_id}")
+async def delete_history_item(job_id: str):
+    """
+    Elimina un beatmap del historial y borra sus archivos asociados.
+    """
+    success = HistoryManager.delete_entry(job_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Beatmap no encontrado en el historial")
+    return {"success": True, "message": "Beatmap eliminado del historial"}
+
 @app.get("/api/download/{job_id}")
 async def download_beatmap(job_id: str):
-    if job_id not in jobs:
-        raise HTTPException(status_code=404, detail="Trabajo no encontrado")
+    osz_path = None
+    if job_id in jobs:
+        job = jobs[job_id]
+        if job.status == JobStatus.COMPLETED and job.osz_path and os.path.exists(job.osz_path):
+            osz_path = job.osz_path
+    
+    # Fallback: buscar en el historial en disco
+    if not osz_path:
+        history = HistoryManager.get_history()
+        match = next((item for item in history if item.get("job_id") == job_id), None)
+        if match and match.get("osz_path") and os.path.exists(match["osz_path"]):
+            osz_path = match["osz_path"]
+
+    if not osz_path:
+        raise HTTPException(status_code=404, detail="El beatmap no se encuentra disponible para descarga")
         
-    job = jobs[job_id]
-    if job.status != JobStatus.COMPLETED or not job.osz_path or not os.path.exists(job.osz_path):
-        raise HTTPException(status_code=400, detail="El beatmap no está listo para descargar")
-        
-    filename = os.path.basename(job.osz_path)
+    filename = os.path.basename(osz_path)
     return FileResponse(
-        path=job.osz_path,
+        path=osz_path,
         filename=filename,
         media_type="application/octet-stream"
     )

@@ -43,8 +43,16 @@
         <div class="audio-analysis-panel hidden" id="analysisPanel">
           <div class="analysis-grid">
             <div class="stat-box">
-              <span class="stat-label">BPM Estimado</span>
-              <span class="stat-val" id="statBpm">--</span>
+              <div class="stat-header-wrap">
+                <span class="stat-label">BPM de la Canción</span>
+                <button type="button" id="btnRecommendBpm" class="btn-text-action" title="Restablecer al BPM detectado por audio">
+                  ✨ Recomendar (<span id="detectedBpmLabel">--</span>)
+                </button>
+              </div>
+              <div class="stat-input-wrap">
+                <input type="number" id="inputBpm" step="0.1" min="30" max="400" placeholder="180">
+                <span class="input-unit">BPM</span>
+              </div>
             </div>
             <div class="stat-box">
               <span class="stat-label">Duración</span>
@@ -76,11 +84,54 @@
           </div>
           <input type="range" id="starSlider" min="1.0" max="10.0" step="0.1" value="7.0" class="star-range">
           
-          <div class="stats-pills">
-            <div class="pill">AR: <strong id="valAr">9.5</strong></div>
-            <div class="pill">CS: <strong id="valCs">4.2</strong></div>
-            <div class="pill">OD: <strong id="valOd">9.2</strong></div>
-            <div class="pill">HP: <strong id="valHp">5.0</strong></div>
+          <!-- Parámetros editables con auto-recomendación -->
+          <div class="stats-header-bar">
+            <span class="sub-label">Parámetros de Dificultad</span>
+            <button type="button" id="btnRecommendStats" class="btn-text-action" title="Restablecer parámetros recomendados para esta cantidad de estrellas">
+              ✨ Recomendar para <span id="recommendStarLabel">7.0★</span>
+            </button>
+          </div>
+
+          <div class="stats-edit-grid">
+            <div class="stat-edit-item">
+              <div class="stat-edit-header">
+                <span class="stat-edit-title">AR</span>
+                <span class="stat-edit-sub">Approach Rate</span>
+              </div>
+              <input type="number" id="inputAr" min="0" max="10" step="0.1" value="9.5">
+            </div>
+
+            <div class="stat-edit-item">
+              <div class="stat-edit-header">
+                <span class="stat-edit-title">CS</span>
+                <span class="stat-edit-sub">Circle Size</span>
+              </div>
+              <input type="number" id="inputCs" min="1" max="10" step="0.1" value="4.2">
+            </div>
+
+            <div class="stat-edit-item">
+              <div class="stat-edit-header">
+                <span class="stat-edit-title">OD</span>
+                <span class="stat-edit-sub">Overall Diff</span>
+              </div>
+              <input type="number" id="inputOd" min="0" max="10" step="0.1" value="9.2">
+            </div>
+
+            <div class="stat-edit-item">
+              <div class="stat-edit-header">
+                <span class="stat-edit-title">HP</span>
+                <span class="stat-edit-sub">Drain Rate</span>
+              </div>
+              <input type="number" id="inputHp" min="0" max="10" step="0.1" value="5.0">
+            </div>
+
+            <div class="stat-edit-item">
+              <div class="stat-edit-header">
+                <span class="stat-edit-title">SV</span>
+                <span class="stat-edit-sub">Slider Velocity</span>
+              </div>
+              <input type="number" id="inputSv" min="0.5" max="3.5" step="0.05" value="1.82">
+            </div>
           </div>
         </div>
 
@@ -109,6 +160,23 @@
       </section>
     </main>
 
+    <!-- Sección: Historial de Beatmaps Generados -->
+    <section class="card history-card" id="historyCard">
+      <div class="history-header">
+        <div class="history-title-wrap">
+          <h2>📂 Historial de Beatmaps Generados</h2>
+          <span class="history-count-badge" id="historyCountBadge">0 mapas</span>
+        </div>
+        <button type="button" id="btnRefreshHistory" class="btn-refresh" title="Actualizar lista">
+          🔄 Actualizar
+        </button>
+      </div>
+
+      <div class="history-list" id="historyList">
+        <div class="history-empty">No hay beatmaps generados todavía. Crea uno arriba para que aparezca aquí.</div>
+      </div>
+    </section>
+
     <!-- Modal / Overlay de Progreso -->
     <div class="modal-overlay hidden" id="progressModal">
       <div class="modal-card">
@@ -131,6 +199,41 @@
           <div class="success-banner">
             ✨ ¡Tu beatmap está listo para jugar en osu!
           </div>
+
+          <!-- Reporte Oficial de Dificultad (rosu-pp) -->
+          <div class="diff-report-card">
+            <div class="diff-report-header">
+              <span class="diff-report-label">Dificultad Oficial Calculada (rosu-pp)</span>
+              <span class="diff-real-badge" id="reportRealStars">--★</span>
+            </div>
+            
+            <div class="diff-stats-row">
+              <div class="diff-stat-col">
+                <span class="diff-stat-name">Objetivo</span>
+                <span class="diff-stat-val" id="reportTargetStars">--★</span>
+              </div>
+              <div class="diff-stat-col">
+                <span class="diff-stat-name">Aim (Salto)</span>
+                <span class="diff-stat-val" id="reportAimStars">--★</span>
+              </div>
+              <div class="diff-stat-col">
+                <span class="diff-stat-name">Speed (Ritmo)</span>
+                <span class="diff-stat-val" id="reportSpeedStars">--★</span>
+              </div>
+              <div class="diff-stat-col">
+                <span class="diff-stat-name">Max Combo</span>
+                <span class="diff-stat-val" id="reportMaxCombo">--x</span>
+              </div>
+            </div>
+
+            <div class="diff-objects-row">
+              <span>Círculos: <strong id="reportCircles">--</strong></span>
+              <span>Sliders: <strong id="reportSliders">--</strong></span>
+            </div>
+
+            <p class="diff-evaluation-text" id="reportEvaluation">Calculando...</p>
+          </div>
+
           <a id="btnDownload" href="#" class="btn-download" download>
             <span>📥 Descargar paquete .osz</span>
           </a>
