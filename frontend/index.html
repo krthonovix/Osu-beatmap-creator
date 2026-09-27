@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ai Mapper — osu! Beatmap Creator</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="osu-badge">osu!</div>
+        <div class="title-wrap">
+          <h1>Ai Mapper</h1>
+          <span class="subtitle">Generador Inteligente de Beatmaps con Diffusion & Transformers</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="pulse-dot"></span>
+        <span id="gpuStatus">NVIDIA GTX 1660 Super (CUDA Activo)</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Left Column: Audio Upload & Stats -->
+      <section class="card upload-card">
+        <h2>1. Canción de Entrada</h2>
+        
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="audioFileInput" accept=".mp3,.wav,.ogg" hidden>
+          <div class="drop-icon">🎵</div>
+          <p class="drop-text">Arrastra tu archivo <strong>.mp3</strong> aquí</p>
+          <p class="drop-sub">o haz clic para explorar tu equipo</p>
+          <div class="file-name-preview" id="fileNamePreview"></div>
+        </div>
+
+        <div class="audio-analysis-panel hidden" id="analysisPanel">
+          <div class="analysis-grid">
+            <div class="stat-box">
+              <span class="stat-label">BPM Estimado</span>
+              <span class="stat-val" id="statBpm">--</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Duración</span>
+              <span class="stat-val" id="statDuration">--:--</span>
+            </div>
+          </div>
+          <div class="meta-inputs">
+            <div class="input-group">
+              <label>Título de la canción</label>
+              <input type="text" id="metaTitle" placeholder="Título">
+            </div>
+            <div class="input-group">
+              <label>Artista</label>
+              <input type="text" id="metaArtist" placeholder="Artista">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Settings & Mapping Configuration -->
+      <section class="card config-card">
+        <h2>2. Configuración del Beatmap</h2>
+
+        <!-- Dificultad (Stars) -->
+        <div class="config-section">
+          <div class="section-title-wrap">
+            <label>Dificultad Objetivo (Star Rating)</label>
+            <span class="star-badge" id="starValueBadge">7.0 ★</span>
+          </div>
+          <input type="range" id="starSlider" min="1.0" max="10.0" step="0.1" value="7.0" class="star-range">
+          
+          <div class="stats-pills">
+            <div class="pill">AR: <strong id="valAr">9.5</strong></div>
+            <div class="pill">CS: <strong id="valCs">4.2</strong></div>
+            <div class="pill">OD: <strong id="valOd">9.2</strong></div>
+            <div class="pill">HP: <strong id="valHp">5.0</strong></div>
+          </div>
+        </div>
+
+        <!-- Estilo de Mapa -->
+        <div class="config-section">
+          <label>Estilo de Mapa</label>
+          <div class="styles-grid" id="stylesGrid">
+            <!-- Cargado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Estilo de Mapper -->
+        <div class="config-section">
+          <label>Estilo del Mapper (Inspiración)</label>
+          <select id="mapperSelect" class="styled-select">
+            <!-- Cargado dinámicamente -->
+          </select>
+          <p class="mapper-desc" id="mapperDescription">Cargando perfil...</p>
+        </div>
+
+        <!-- Botón de Generación -->
+        <button id="btnGenerate" class="btn-generate" disabled>
+          <span class="btn-icon">⚡</span>
+          <span>Generar Beatmap con IA</span>
+        </button>
+      </section>
+    </main>
+
+    <!-- Modal / Overlay de Progreso -->
+    <div class="modal-overlay hidden" id="progressModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">Generando Beatmap con IA</div>
+          <div class="spinner"></div>
+        </div>
+        
+        <div class="progress-container">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+          </div>
+          <div class="progress-percentage" id="progressPercentage">0%</div>
+        </div>
+
+        <p class="status-msg" id="statusMessage">Iniciando pipeline de difusión...</p>
+
+        <!-- Resultado final cuando termine -->
+        <div class="download-section hidden" id="downloadSection">
+          <div class="success-banner">
+            ✨ ¡Tu beatmap está listo para jugar en osu!
+          </div>
+          <a id="btnDownload" href="#" class="btn-download" download>
+            <span>📥 Descargar paquete .osz</span>
+          </a>
+          <p class="help-text">Una vez descargado, haz doble clic en el archivo .osz o arrástralo a la ventana de osu! para importarlo automáticamente.</p>
+          <button id="btnCloseModal" class="btn-secondary">Cerrar y crear otro</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

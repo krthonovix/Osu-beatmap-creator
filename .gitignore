@@ -1,0 +1,35 @@
+# Entornos virtuales de Python
+.venv/
+*/.venv/
+venv/
+env/
+ENV/
+
+# Python cache y compilados
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Archivos temporales y de salida
+temp/
+output/
+*.osz
+*.mp3
+*.wav
+*.ogg
+*.osu
+
+# Logs y bases de datos
+*.log
+*.sqlite3
+
+# Entornos del sistema y configuraciones locales
+.env
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Submódulo / Repositorio externo
+Mapperatorinator/
