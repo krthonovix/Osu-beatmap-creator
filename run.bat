@@ -4,7 +4,7 @@ cd /d "%~dp0"
 
 echo ===================================================
 echo   Ai Mapper - osu! Beatmap Creator con IA
-echo   GPU: NVIDIA GeForce GTX 1660 SUPER (CUDA)
+echo   Aceleracion por GPU con PyTorch & CUDA
 echo ===================================================
 echo.
 

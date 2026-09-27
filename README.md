@@ -9,7 +9,7 @@
 
 An intelligent, local web application that converts any `.mp3` audio track into a fully playable, rankable-quality **osu!** beatmap (`.osz`) using deep learning (Transformers & Diffusion models).
 
-[Features](#-key-features) • [Installation](#-installation) • [Usage](#-usage) • [Architecture](#-architecture) • [Credits](#-acknowledgments)
+[Features](#-key-features) • [Installation](#-installation) • [Usage](#-usage) • [Architecture](#-architecture) • [Core Engine](#-core-engine)
 
 </div>
 
@@ -33,7 +33,7 @@ An intelligent, local web application that converts any `.mp3` audio track into 
   - *Alternating (Alt)*
   - *Slider-Heavy / Flow*
 - **Automatic Difficulty Scaling:** Target any Star Rating between **1.0★ and 10.0★**. The engine calculates canonical competitive osu! parameters (**AR, CS, OD, HP, and Slider Velocity**) matching the selected difficulty tier.
-- **Hardware Acceleration:** Native PyTorch CUDA acceleration for fast tensor evaluation and sampling on NVIDIA GPUs (e.g., GTX 1660 Super and above).
+- **Hardware Acceleration:** Native PyTorch GPU acceleration with CUDA support for fast tensor evaluation and diffusion sampling (CPU fallback available).
 - **Modern Web Interface:** Clean osu!-inspired dark theme with real-time Server-Sent Events (SSE) progress tracking.
 
 ---
@@ -41,9 +41,9 @@ An intelligent, local web application that converts any `.mp3` audio track into 
 ## 🖥️ System Requirements
 
 ### Hardware
-- **GPU (Recommended):** NVIDIA GPU with at least 6 GB VRAM and CUDA support.
+- **GPU (Recommended):** NVIDIA GPU with CUDA support (4 GB VRAM minimum, 6 GB+ recommended for optimal speed). CPU mode is supported as a fallback.
 - **RAM:** 8 GB minimum (16 GB recommended).
-- **Disk Space:** ~10 GB free space for virtual environments, PyTorch wheels, and model cache.
+- **Disk Space:** ~8 to 10 GB free space for virtual environments, PyTorch wheels, and model cache.
 
 ### Software
 - **OS:** Windows 10 / 11 (64-bit).
@@ -149,8 +149,6 @@ flowchart LR
 
 ---
 
-## 🤝 Acknowledgments
+## 🔗 Core Engine
 
-- **[OliBomby](https://github.com/OliBomby)** for creating [Mapperatorinator](https://github.com/OliBomby/Mapperatorinator) and [osu-diffusion](https://github.com/OliBomby/osu-diffusion).
-- **[gyataro](https://github.com/gyataro)** for the [osuT5](https://github.com/gyataro/osuT5) sequence-to-sequence model architecture.
-- **[ppy](https://github.com/ppy)** and the **osu!** team for the game and open beatmap specifications.
+This project uses the [Mapperatorinator](https://github.com/OliBomby/Mapperatorinator) framework as its core AI generation engine for audio spectrogram processing, rhythmic sequencing, and diffusion-based hit object coordinate prediction.
